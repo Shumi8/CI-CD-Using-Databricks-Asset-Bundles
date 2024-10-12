@@ -1,0 +1,70 @@
+trigger:
+  branches:
+    include:
+      - 'CustomerSuccess'  # Ensure it only triggers on changes to this branch
+  paths:
+    include:
+      - 'CustomerService/Resources/JobConfiguration.yml'  # Only trigger when this file changes
+
+stages:
+
+- stage: DeployToDev
+  displayName: 'Deploy to Development'
+  condition: eq(variables['Build.SourceBranchName'], 'CustomerSuccess')
+  jobs:
+  - job: DeployDevJob
+    displayName: 'Deploy to Dev Environment'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+
+    - script: env | sort
+      displayName: 'Environment / Context'
+      env:
+        DATABRICKS_HOST: 'DatabricksInstance'  # Hardcoded Databricks workspace URL
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)  # Secure Databricks token from environment variables
+
+    - script: |
+        echo "Current branch is: $(Build.SourceBranchName)"
+      displayName: 'Display Branch Name'
+      env:
+        DATABRICKS_HOST: 'DatabricksInstance'
+
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.8'
+      inputs:
+        versionSpec: '3.8'
+
+    - checkout: self
+      displayName: 'Checkout Source Code'
+
+    - script: |
+        # Install Python dependencies
+        python -m pip install --upgrade pip
+        python -m pip install wheel
+      displayName: 'Install Python Dependencies'
+
+    - script: |
+        echo "Installing the new Databricks CLI..."
+        curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+        echo "Databricks CLI installed successfully."
+      displayName: 'Install Databricks CLI'
+
+    - script: |
+        echo "Validating Databricks Bundle..."
+        cd MaiaForCustomerService  # Navigate to the directory where databricks.yml is located
+        databricks --version
+        databricks bundle validate -t dev
+      displayName: 'Validate Databricks Bundle'
+      env:
+        DATABRICKS_HOST: 'DatabricksInstance'
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+
+    - script: |
+        echo "Deploying Databricks Bundle..."
+        cd MaiaForCustomerService  # Navigate to the directory where databricks.yml is located
+        databricks bundle deploy -t dev
+      displayName: 'Deploy Databricks Bundle'
+      env:
+        DATABRICKS_HOST: 'DatabricksInstance'
+        DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
