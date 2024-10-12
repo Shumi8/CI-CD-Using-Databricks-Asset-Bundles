@@ -1,0 +1,13 @@
+bundle:
+  name: CustomerSuccess
+
+include:
+  - Resources/*.yml  # Include any YAML configuration
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: databricks instance
+      root_path: /databricksdirectory/${bundle.target}
