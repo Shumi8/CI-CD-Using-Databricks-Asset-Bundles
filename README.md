@@ -1,6 +1,6 @@
 # CI/CD using Databricks Asset Bundles
 
-This repository contains the configuration for a **CI/CD pipeline** implemented for Denmark's largest retail organization using **Azure DevOps** and **Databricks Asset Bundles**. The pipeline automates the deployment of Databricks jobs to a development environment, ensuring that updates to key configuration files trigger an efficient deployment workflow.
+This repository contains the configuration for a **CI/CD pipeline** implemented using **Azure DevOps** and **Databricks Asset Bundles**. The pipeline automates the deployment of Databricks jobs to a development environment, ensuring that updates to key configuration files trigger an efficient deployment workflow.
 
 ## Features
 
